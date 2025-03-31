@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captured Emotion</title>
+</head>
+<body>
+    <h1>Detected Emotion</h1>
+    <img src="{{ img_path }}" width="640px">
+    <h2>Prediction: {{ prediction }}</h2>
+    <br><br>
+    <a href="{{ url_for('index') }}"><button>Go Back</button></a>
+</body>
+</html>

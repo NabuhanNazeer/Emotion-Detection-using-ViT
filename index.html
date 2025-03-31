@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+</head>
+<body>
+    <h1>Emotion Detection System</h1>
+
+    <!-- Webcam Capture -->
+    <h2>Capture from Webcam</h2>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="capture">Capture</button>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <img id="photo" src="" alt="Captured Image">
+    <button id="uploadCapture">Upload Captured Image</button>
+
+    <hr>
+
+    <!-- Upload from Device -->
+    <h2>Upload an Image</h2>
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="uploadFile">Upload Selected Image</button>
+    <img id="preview" src="" alt="Uploaded Image">
+
+    <p id="result"></p>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const photo = document.getElementById('photo');
+        const captureButton = document.getElementById('capture');
+        const uploadCaptureButton = document.getElementById('uploadCapture');
+        const uploadFileButton = document.getElementById('uploadFile');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const result = document.getElementById('result');
+
+        // Access the webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => { console.error("Error accessing webcam:", err); });
+
+        // Capture Image from Webcam
+        captureButton.addEventListener('click', () => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            photo.src = canvas.toDataURL('image/jpeg');
+        });
+
+        // Upload Captured Image
+        uploadCaptureButton.addEventListener('click', () => {
+            const imageData = canvas.toDataURL('image/jpeg');
+            sendImage(imageData);
+        });
+
+        // Handle File Selection
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Upload Selected Image
+        uploadFileButton.addEventListener('click', () => {
+            if (preview.src) {
+                sendImage(preview.src);
+            } else {
+                alert("Please select an image first.");
+            }
+        });
+
+        // Function to Send Image to Server
+        function sendImage(imageData) {
+            fetch('/upload', {
+                method: 'POST',
+                body: JSON.stringify({ image: imageData }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => { result.textContent = "Predicted Emotion: " + data.prediction; })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
